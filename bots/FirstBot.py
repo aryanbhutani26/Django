@@ -124,7 +124,8 @@
 #     generate()
 # bots/FirstBot.py
 
-from google import genai
+# from google import genai
+import google.generativeai as genai
 from google.genai.types import (
     Content,
     Part,
