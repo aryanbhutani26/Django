@@ -4,6 +4,10 @@ from pydantic import BaseModel
 import os
 import sys
 
+#Added Cors 
+from fastapi.middleware.cors import CORSMiddleware
+
+
 # Add bots directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "bots"))
 
@@ -12,6 +16,15 @@ from FirstBot import run_first_bot
 from SecondBot import run_second_bot
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://gdg-self.vercel.app/"],  # Replace "*" with your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class PersonalizedRequest(BaseModel):
     name: str
