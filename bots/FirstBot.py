@@ -126,7 +126,7 @@
 
 # from google import genai
 import google.generativeai as genai
-from google.genai.types import (
+from google.generativeai.types import (
     Content,
     Part,
     GenerateContentConfig,
