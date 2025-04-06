@@ -124,31 +124,128 @@
 #     generate()
 # bots/FirstBot.py
 
+
+
 # from google import genai
-import google.generativeai as genai
-from google.generativeai.types import (
-    Content,
-    Part,
-    GenerateContentConfig,
-    Tool,
-    GoogleSearch,
-    SafetySetting,
-)
+# from google.genai.types import (
+#     Content,
+#     Part,
+#     GenerateContentConfig,
+#     Tool,
+#     GoogleSearch,
+#     SafetySetting,
+# )
+
+# import os
+
+# def run_first_bot(message: str) -> str:
+#     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+#     model = "gemini-2.5-pro-exp-03-25"
+
+#     contents = [
+#         Content(
+#             role="user",
+#             parts=[Part.from_text("What’s the difference between SIP and FD?")]
+#         ),
+#         Content(
+#             role="model",
+#             parts=[Part.from_text("""
+# SIP (Systematic Investment Plan) and FD (Fixed Deposit) are both popular financial instruments in India, but they serve different purposes and come with distinct features:
+
+# 1. Investment Type:
+# - SIP: Invests in mutual funds monthly.
+# - FD: Lump sum locked for fixed tenure with guaranteed interest.
+
+# 2. Returns:
+# - SIP: Market-linked, higher potential, carries risk.
+# - FD: Fixed, low-risk returns.
+
+# 3. Risk:
+# - SIP: Depends on fund type and market.
+# - FD: Very low, mostly insured.
+
+# 4. Liquidity:
+# - SIP: Withdrawable anytime (except lock-in).
+# - FD: Premature withdrawal with penalty.
+
+# 5. Taxation:
+# - SIP: LTCG 10% beyond ₹1L, STCG 15%.
+# - FD: Fully taxable.
+
+# 6. Flexibility:
+# - SIP: Start/stop/change anytime.
+# - FD: Locked once started.
+
+# Best choice depends on goals, time, and risk tolerance.
+# """)]
+#         ),
+#         Content(
+#             role="user",
+#             parts=[Part.from_text(message)]
+#         )
+#     ]
+
+#     tools = [Tool(google_search=GoogleSearch())]
+
+#     config = GenerateContentConfig(
+#         temperature=0.35,
+#         top_p=1,
+#         tools=tools,
+#         safety_settings=[
+#             SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="BLOCK_LOW_AND_ABOVE"),
+#             SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="BLOCK_ONLY_HIGH"),
+#             SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="BLOCK_LOW_AND_ABOVE"),
+#             SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="BLOCK_LOW_AND_ABOVE"),
+#         ],
+#         system_instruction=[
+#             Part.from_text("""
+# You are WealthGenie — an intelligent and friendly AI financial literacy assistant for Indian users.
+
+# Tone: Friendly, Motivational, Clear.
+# Audience: Young Indians learning about finance.
+
+# Use emojis moderately, simplify explanations, and include Indian examples. Don’t respond with “As an AI language model…”. Redirect non-finance queries politely.
+# """)
+#         ],
+#     )
+
+#     final_output = []
+#     for chunk in client.models.generate_content_stream(
+#         model=model,
+#         contents=contents,
+#         config=config,
+#     ):
+#         if chunk.text:
+#             final_output.append(chunk.text)
+
+#     return "".join(final_output)
 
 import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()  # Loads GEMINI_API_KEY from .env
 
 def run_first_bot(message: str) -> str:
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
-    model = "gemini-2.5-pro-exp-03-25"
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-    contents = [
-        Content(
-            role="user",
-            parts=[Part.from_text("What’s the difference between SIP and FD?")]
-        ),
-        Content(
-            role="model",
-            parts=[Part.from_text("""
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-pro",  # or "gemini-2.5-pro" if available to you
+        system_instruction="""
+You are WealthGenie — an intelligent and friendly AI financial literacy assistant for Indian users.
+
+Tone: Friendly, Motivational, Clear.
+Audience: Young Indians learning about finance.
+
+Use emojis moderately, simplify explanations, and include Indian examples. Don’t respond with “As an AI language model…”. Redirect non-finance queries politely.
+"""
+    )
+
+    convo = model.start_chat()
+
+    # Starter prompt to set context
+    convo.send_message("What’s the difference between SIP and FD?")
+    convo.send_message("""
 SIP (Systematic Investment Plan) and FD (Fixed Deposit) are both popular financial instruments in India, but they serve different purposes and come with distinct features:
 
 1. Investment Type:
@@ -176,45 +273,8 @@ SIP (Systematic Investment Plan) and FD (Fixed Deposit) are both popular financi
 - FD: Locked once started.
 
 Best choice depends on goals, time, and risk tolerance.
-""")]
-        ),
-        Content(
-            role="user",
-            parts=[Part.from_text(message)]
-        )
-    ]
-
-    tools = [Tool(google_search=GoogleSearch())]
-
-    config = GenerateContentConfig(
-        temperature=0.35,
-        top_p=1,
-        tools=tools,
-        safety_settings=[
-            SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="BLOCK_LOW_AND_ABOVE"),
-            SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="BLOCK_ONLY_HIGH"),
-            SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="BLOCK_LOW_AND_ABOVE"),
-            SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="BLOCK_LOW_AND_ABOVE"),
-        ],
-        system_instruction=[
-            Part.from_text("""
-You are WealthGenie — an intelligent and friendly AI financial literacy assistant for Indian users.
-
-Tone: Friendly, Motivational, Clear.
-Audience: Young Indians learning about finance.
-
-Use emojis moderately, simplify explanations, and include Indian examples. Don’t respond with “As an AI language model…”. Redirect non-finance queries politely.
 """)
-        ],
-    )
 
-    final_output = []
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=config,
-    ):
-        if chunk.text:
-            final_output.append(chunk.text)
+    response = convo.send_message(message)
 
-    return "".join(final_output)
+    return response.text
